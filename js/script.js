@@ -117,12 +117,6 @@ function initialise() {
         if (ev.defaultPrevented)
             return;
 
-        if (!ev.altKey && !ev.ctrlKey && ev.shiftKey && ev.key === 'Escape') {
-            window.parent.postMessage({type: 'EDGI_WM_SYSTEM_MENU'}, '*')
-            ev.preventDefault()
-            return
-        }
-
         //just standard for now
         let commandStr = standardKeyboardMap[ev.key];
         if (commandStr != undefined) {
@@ -137,48 +131,6 @@ function initialise() {
             btn.click();
         }
     })
-
-    /**
-    * Forward unhandled mousedown events to parent, to support
-    * dragging around window
-    */
-    let dragging = false
-    document.addEventListener('mousedown', (ev) => {
-        if (window.parent) {
-            const { clientX, clientY } = ev
-            window.parent.postMessage({type: 'EDGI_WM_MOUSE_DOWN', payload: { clientX, clientY }}, '*')
-        }
-        if (ev.target && ev.target.tagName === 'BUTTON') {
-            return
-        }
-        if (window.parent) {
-            dragging = true
-            const { clientX, clientY } = ev
-            window.parent.postMessage({type: 'EDGI_WM_DRAG_START', payload: { clientX, clientY }}, '*')
-            ev.preventDefault()
-        }
-    })
-    document.addEventListener('mousemove', (ev) => {
-        if (dragging && window.parent) {
-            const { clientX, clientY } = ev
-            window.parent.postMessage({type: 'EDGI_WM_DRAG_MOVE', payload: { clientX, clientY }}, '*')
-            ev.preventDefault()
-        }
-    })
-    document.addEventListener('mouseup', (ev) => {
-        if (dragging && window.parent) {
-            const { clientX, clientY } = ev
-            window.parent.postMessage({type: 'EDGI_WM_DRAG_END', payload: { clientX, clientY }}, '*')
-            ev.preventDefault()
-        }
-        dragging = false
-    })
-    window.addEventListener('message', (ev) => {
-        if (ev.data  && ev.data.type === 'EDGI_WM_DRAG_END') {
-            dragging = false
-        }
-    })
-
 
     /**
     * Sidebar navigation // please rewrite this shitty code better
